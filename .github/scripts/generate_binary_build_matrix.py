@@ -292,8 +292,8 @@ def generate_wheels_matrix(
     python_versions: Optional[List[str]] = None,
 ) -> List[Dict[str, str]]:
     package_type = "wheel"
-    if os == "linux" or os == "linux-aarch64":
-        # NOTE: We only build manywheel packages for x86_64 and aarch64 linux
+    if os == "linux" or os == "linux-aarch64" or os == "linux-s390x":
+        # NOTE: We only build manywheel packages for x86_64 and aarch64 and s390x linux
         package_type = "manywheel"
 
     if python_versions is None:
