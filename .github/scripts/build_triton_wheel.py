@@ -10,9 +10,6 @@ from typing import Optional
 SCRIPT_DIR = Path(__file__).parent
 REPO_DIR = SCRIPT_DIR.parent.parent
 
-# TODO: Remove me once Triton version is again in sync for vanilla and ROCm
-ROCM_TRITION_VERSION = "2.1.0"
-
 
 def read_triton_pin(rocm_hash: bool = False) -> str:
     triton_file = "triton.txt" if not rocm_hash else "triton-rocm.txt"
@@ -92,11 +89,10 @@ def build_triton(
     with TemporaryDirectory() as tmpdir:
         triton_basedir = Path(tmpdir) / "triton"
         triton_pythondir = triton_basedir / "python"
+        triton_repo = "https://github.com/openai/triton"
         if build_rocm:
-            triton_repo = "https://github.com/jataylo/triton"
             triton_pkg_name = "pytorch-triton-rocm"
         else:
-            triton_repo = "https://github.com/openai/triton"
             triton_pkg_name = "pytorch-triton"
         check_call(["git", "clone", triton_repo], cwd=tmpdir)
         if release:
@@ -162,7 +158,7 @@ def build_triton(
         patch_init_py(
             triton_pythondir / "triton" / "__init__.py",
             version=f"{version}",
-            expected_version=ROCM_TRITION_VERSION if build_rocm else None,
+            expected_version=None,
         )
 
         if build_rocm:
@@ -173,7 +169,7 @@ def build_triton(
                 version=f"{version}",
                 expected_version=ROCM_TRITION_VERSION,
             )
-            check_call("scripts/amd/setup_rocm_libs.sh", cwd=triton_basedir, shell=True)
+            check_call("third_party/amd/scripts/setup_rocm_libs.sh", cwd=triton_basedir, shell=True)
             print("ROCm libraries setup for triton installation...")
 
         check_call(
@@ -184,7 +180,7 @@ def build_triton(
         shutil.copy(whl_path, Path.cwd())
 
         if build_rocm:
-            check_call("scripts/amd/fix_so.sh", cwd=triton_basedir, shell=True)
+            check_call("third_party/amd/scripts/fix_so.sh", cwd=triton_basedir, shell=True)
 
         return Path.cwd() / whl_path.name
 
