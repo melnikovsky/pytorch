@@ -334,8 +334,12 @@ class CachingAutotuner(KernelInterface):
                 ),
             )
 
-            # Temporary hardcoded warp size for ROCm
-            target = (compile_meta["device_type"], cc) if not torch.version.hip else (compile_meta["device_type"], cc, 64)
+            if 'gfx10' in cc or 'gfx11' in cc:
+                rocm_warp_size = 32
+            else
+                rocm_warp_size = 64
+            
+            target = (compile_meta["device_type"], cc) if not torch.version.hip else [compile_meta["device_type"], cc, rocm_warp_size]
             
             options = {
                 "num_warps": compile_meta["num_warps"],
