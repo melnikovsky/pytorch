@@ -1445,7 +1445,7 @@ class TestNestedTensor(torch._dynamo.test_case.TestCase):
             if isinstance(nt_view._base, NestedTensor):
                 self.assertExpectedInline(guard_str, """Eq(s3 - 1, s0)""")
             else:
-                self.assertExpectedInline(guard_str, """""")
+                self.assertExpectedInline(guard_str, """8*s1*s3 <= 8*s0*s1""")
             return gm
 
         torch._dynamo.reset()
