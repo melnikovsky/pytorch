@@ -357,9 +357,7 @@ if(USE_UCC)
 endif()
 
 # Allow torch_python to link to OpenTelemetry API headers
-set(OPENTELEMETRY_API_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/opentelemetry-cpp/api/include")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/opentelemetry-cpp/api")
-target_link_libraries(torch_python PRIVATE opentelemetry_api)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../third_party/opentelemetry-cpp/api/include)
 
 if(BUILD_ONEDNN_GRAPH)
   target_compile_definitions(torch_python PRIVATE "-DBUILD_ONEDNN_GRAPH")
