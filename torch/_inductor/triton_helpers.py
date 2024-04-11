@@ -1,10 +1,15 @@
+import torch
+
 import triton
 import triton.language as tl
 
 # In the latest triton, math functions were shuffled around into different modules:
 # https://github.com/openai/triton/pull/3172
 if hasattr(tl.extra, "cuda") and hasattr(tl.extra.cuda, "libdevice"):
-    libdevice = tl.extra.cuda.libdevice
+    if torch.version.hip is None:
+        libdevice = tl.extra.cuda.libdevice
+    else
+        libdevice = tl.math
     math = tl.math
 elif hasattr(tl.extra, "intel") and hasattr(tl.extra.intel, "libdevice"):
     libdevice = tl.extra.intel.libdevice
