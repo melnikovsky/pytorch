@@ -8,7 +8,7 @@ import triton.language as tl
 if hasattr(tl.extra, "cuda") and hasattr(tl.extra.cuda, "libdevice"):
     if torch.version.hip is None:
         libdevice = tl.extra.cuda.libdevice
-    else
+    else:
         libdevice = tl.math
     math = tl.math
 elif hasattr(tl.extra, "intel") and hasattr(tl.extra.intel, "libdevice"):
