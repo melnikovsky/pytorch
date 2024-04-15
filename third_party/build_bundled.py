@@ -102,9 +102,9 @@ def identify_license(f, exception=''):
         elif 'BoostSoftwareLicense-Version1.0' in txt:
             # Hmm, do we need to check the text?
             return 'BSL-1.0'
-        elif 'gettimeofday.c' in txt:
+        elif 'gettimeofday' in txt:
             # Used in opentelemetry-cpp/tools/vcpkg/ports/gettimeofday
-            return 'gettimeofday.c'
+            return 'gettimeofday'
         elif 'libhungarian' in txt:
             # Used in opentelemetry-cpp/tools/vcpkg/ports/hungarian
             return 'libhungarian'
