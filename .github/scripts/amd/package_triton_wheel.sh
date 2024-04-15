@@ -20,7 +20,7 @@ ROCM_INT=$(($MAJOR_VERSION * 10000 + $MINOR_VERSION * 100)) # Add patch later
 
 # Check TRITON_ROCM_DIR is set
 if [[ -z "${TRITON_ROCM_DIR}" ]]; then
-  export TRITON_ROCM_DIR=third_party/amd/backend
+    export TRITON_ROCM_DIR=third_party/amd/backend
 fi
 
 # Remove packaged libs and headers
@@ -47,7 +47,6 @@ if [[ "${MAJOR_VERSION}" == "6" ]]; then
 else
     libamdhip="libamdhip64.so.5"
 fi
-
 
 # Required ROCm libraries - ROCm 6.0
 ROCM_SO=(
