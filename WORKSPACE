@@ -355,12 +355,17 @@ local_repository(
 
 local_repository(
     name = "unused_opentelemetry_api_tests",
-    path = "third_party/opentelemetry-cpp/api/test"
+    path = "third_party/opentelemetry-cpp/api/test",
 )
 
 local_repository(
-    name = "unused_opentelemetry_benchmark",
-    path = "third_party/opentelemetry-cpp/third_party/benchmark"
+    name = "unused_opentelemetry_third_party",
+    path = "third_party/opentelemetry-cpp/third_party",
+)
+
+local_repository(
+    name = "unused_opentelemetry_exporters",
+    path = "third_party/opentelemetry-cpp/exporters",
 )
 
 ### Unused repos end
