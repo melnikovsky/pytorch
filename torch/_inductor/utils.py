@@ -1333,7 +1333,8 @@ def get_device_tflops(dtype):
         # Triton API change in https://github.com/openai/triton/pull/2293
         from torch._utils_internal import max_clock_rate
 
-        sm_clock = max_clock_rate()
+	# Set to 1 on ROCm until max_clock_rate supported
+        sm_clock = max_clock_rate() if torch.version.hip is None else 1
         if dtype in (torch.float16, torch.bfloat16):
             return get_max_tensorcore_tflops(dtype, sm_clock)
 
