@@ -347,4 +347,9 @@ local_repository(
     path = "third_party/onnx-tensorrt/third_party/onnx/third_party/benchmark",
 )
 
+local_repository(
+    name = "unused_opentelemetry_api_tests"
+    path = "third_party/opentelemetry-cpp/api/test"
+)
+
 ### Unused repos end
