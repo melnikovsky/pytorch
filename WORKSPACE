@@ -348,7 +348,7 @@ local_repository(
 )
 
 local_repository(
-    name = "unused_opentelemetry_api_tests"
+    name = "unused_opentelemetry_api_tests",
     path = "third_party/opentelemetry-cpp/api/test"
 )
 
