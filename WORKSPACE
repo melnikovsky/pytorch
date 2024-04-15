@@ -359,8 +359,8 @@ local_repository(
 )
 
 local_repository(
-    name = "unused_opentelemetry_benchmark_tools",
-    path = "third_party/opentelemetry-cpp/third_party/benchmark/tools"
+    name = "unused_opentelemetry_benchmark",
+    path = "third_party/opentelemetry-cpp/third_party/benchmark"
 )
 
 ### Unused repos end
