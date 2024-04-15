@@ -89,6 +89,12 @@ new_local_repository(
     path = "third_party/foxi",
 )
 
+new_local_repository(
+  name = "opentelemetry-cpp_api",
+  build_file = "//third_party:opentelemetry-cpp.BUILD",
+  path = "third_party/opentelemetry-cpp/api",
+)
+
 local_repository(
     name = "com_google_protobuf",
     path = "third_party/protobuf",
