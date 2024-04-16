@@ -355,8 +355,73 @@ local_repository(
 )
 
 local_repository(
-    name = "unused_opentelemetry_api_test",
-    path = "third_party/opentelemetry-cpp/api/test",
+    name = "unused_opentelemetry_api_test_baggage",
+    path = "third_party/opentelemetry-cpp/api/test/baggage",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_baggage_propagation",
+    path = "third_party/opentelemetry-cpp/api/test/baggage/propagation",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_common",
+    path = "third_party/opentelemetry-cpp/api/test/common",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_context",
+    path = "third_party/opentelemetry-cpp/api/test/context",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_context_propagation",
+    path = "third_party/opentelemetry-cpp/api/test/context/propagation",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_core",
+    path = "third_party/opentelemetry-cpp/api/test/core",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_logs",
+    path = "third_party/opentelemetry-cpp/api/test/logs",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_metrics",
+    path = "third_party/opentelemetry-cpp/api/test/metrics",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_nostd",
+    path = "third_party/opentelemetry-cpp/api/test/nostd",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_plugin",
+    path = "third_party/opentelemetry-cpp/api/test/plugin",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_singleton",
+    path = "third_party/opentelemetry-cpp/api/test/singleton",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_trace",
+    path = "third_party/opentelemetry-cpp/api/test/trace",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_trace_propagation",
+    path = "third_party/opentelemetry-cpp/api/test/trace/propagation",
+)
+
+local_repository(
+    name = "unused_opentelemetry_api_test_trace_propagation/detail",
+    path = "third_party/opentelemetry-cpp/api/test/trace/propgation/detail",
 )
 
 local_repository(
