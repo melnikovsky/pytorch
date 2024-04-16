@@ -737,6 +737,9 @@ PyObject* THCPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
   py::str snapshot_s = "snapshot";
   py::str oom_s = "oom";
   py::str device_free_s = "device_free";
+  py::str annotation_start_s = "annotation_start";
+  py::str annotation_end_s = "annotation_end";
+  py::str name_s = "name";
 
   using namespace c10::cuda::CUDACachingAllocator;
 
@@ -760,6 +763,10 @@ PyObject* THCPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
         return segment_unmap_s;
       case TraceEntry::SEGMENT_MAP:
         return segment_map_s;
+      case TraceEntry::ANNOTATION_START:
+        return annotation_start_s;
+      case TraceEntry::ANNOTATION_END:
+        return annotation_end_s;
     }
     throw std::runtime_error("unreachable");
   };
@@ -780,6 +787,9 @@ PyObject* THCPModule_memorySnapshot(PyObject* _unused, PyObject* noargs) {
       trace_entry[size_s] = te.size_;
       trace_entry[stream_s] = int64_t(te.stream_);
       trace_entry[time_us_s] = te.time_.t_;
+      if (te.name_ != "") {
+        trace_entry[name_s] = te.name_;
+      }
       trace.append(trace_entry);
     }
     traces.append(trace);
@@ -960,6 +970,11 @@ static void registerCudaDeviceProperties(PyObject* module) {
           c10::optional<std::string>,
           const std::string&,
           size_t)>(torch::cuda::_record_memory_history));
+
+  m.def(
+      "_cuda_recordAnnotation",
+      static_cast<void (*)(bool, const std::string&)>(
+          c10::cuda::CUDACachingAllocator::recordAnnotation));
 
   m.def("_cuda_isHistoryEnabled", []() {
     return c10::cuda::CUDACachingAllocator::isHistoryEnabled();

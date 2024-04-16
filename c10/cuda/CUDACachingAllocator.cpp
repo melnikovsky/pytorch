@@ -939,6 +939,8 @@ class DeviceCachingAllocator {
     stats.max_split_size =
         static_cast<int64_t>(CUDAAllocatorConfig::max_split_size());
     context_recorder_.store(nullptr);
+    c10::_setRecordAnnotationsToMemorySnapshotFn(
+        &c10::cuda::CUDACachingAllocator::recordAnnotation);
   }
 
   void recordHistory(
@@ -956,6 +958,12 @@ class DeviceCachingAllocator {
       alloc_trace_next = 0;
       alloc_trace->clear();
     }
+  }
+
+  void recordAnnotation(bool start, const std::string& name) {
+    auto type =
+        start ? TraceEntry::ANNOTATION_START : TraceEntry::ANNOTATION_END;
+    record_trace(type, 0, 0, nullptr, 0, nullptr, name);
   }
 
   bool isHistoryEnabled() {
@@ -2796,7 +2804,8 @@ class DeviceCachingAllocator {
       size_t size,
       cudaStream_t stream,
       c10::DeviceIndex device,
-      std::shared_ptr<GatheredContext> context) {
+      std::shared_ptr<GatheredContext> context,
+      std::string name = "") {
     if (!record_history && trace_trackers_.empty())
       return;
 
@@ -2807,7 +2816,8 @@ class DeviceCachingAllocator {
         size,
         stream,
         getApproximateTime(),
-        record_context_ >= RecordContext::ALLOC ? std::move(context) : nullptr);
+        record_context_ >= RecordContext::ALLOC ? std::move(context) : nullptr,
+        name);
 
     // Callbacks should not include any Pytorch call
     for (const auto& cb : trace_trackers_) {
@@ -2971,6 +2981,12 @@ class NativeCachingAllocator : public CUDAAllocator {
     for (auto& allocator : device_allocator) {
       allocator->recordHistory(
           enabled, context_recorder, alloc_trace_max_entries, when);
+    }
+  }
+
+  void recordAnnotation(bool start, const std::string& name) override {
+    for (auto& allocator : device_allocator) {
+      allocator->recordAnnotation(start, name);
     }
   }
 

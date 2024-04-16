@@ -453,6 +453,7 @@ torch_c_binding_in_graph_functions = dict.fromkeys(
         "torch._C._cuda_memoryStats",
         "torch._C._cuda_record_memory_history_legacy",
         "torch._C._cuda_record_memory_history",
+        "torch._C._cuda_recordAnnotation",
         "torch._C._cuda_releasePool",
         "torch._C._cuda_resetAccumulatedMemoryStats",
         "torch._C._cuda_resetPeakMemoryStats",

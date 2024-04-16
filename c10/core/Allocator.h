@@ -316,4 +316,10 @@ struct GatheredContext {
   virtual ~GatheredContext() = default;
 };
 
+C10_API void _setRecordAnnotationsToMemorySnapshotFn(
+    std::function<void(bool, const std::string&)>);
+C10_API void reportRecordAnnotationsToMemorySnapshot(
+    bool start,
+    const std::string& name);
+
 } // namespace c10

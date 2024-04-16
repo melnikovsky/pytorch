@@ -265,6 +265,15 @@ void CUDAPluggableAllocator::recordHistory(
       "If you need it, please file an issue describing your use case.");
 }
 
+void CUDAPluggableAllocator::recordAnnotation(
+    bool start,
+    const std::string& name) {
+  TORCH_CHECK(
+      false,
+      "CUDAPluggableAllocator does not yet support recordAnnotation. "
+      "If you need it, please file an issue describing your use case.");
+}
+
 void CUDAPluggableAllocator::attachOutOfMemoryObserver(
     c10::cuda::CUDACachingAllocator::OutOfMemoryObserver observer) {
   TORCH_CHECK(

@@ -170,8 +170,10 @@ struct TraceEntry {
     SEGMENT_UNMAP, // unmap part of a segment (used with expandable segments)
     SNAPSHOT, // a call to snapshot, used to correlate memory snapshots to trace
               // events
-    OOM // the allocator threw an OutOfMemoryError (addr_ is the amount of free
-        // bytes reported by cuda)
+    OOM, // the allocator threw an OutOfMemoryError (addr_ is the amount of free
+         // bytes reported by cuda)
+    ANNOTATION_START, // API call made to record the start of an annotation
+    ANNOTATION_END // API call made to record the end of an annotation
   };
   TraceEntry(
       Action action,
@@ -180,13 +182,15 @@ struct TraceEntry {
       size_t size,
       cudaStream_t stream,
       approx_time_t time,
-      std::shared_ptr<GatheredContext> context = nullptr)
+      std::shared_ptr<GatheredContext> context = nullptr,
+      std::string name = "")
       : action_(action),
         device_(device),
         addr_(addr),
         context_(std::move(context)),
         stream_(stream),
-        size_(size) {
+        size_(size),
+        name_(std::move(name)) {
     time_.approx_t_ = time;
   }
   Action action_;
@@ -196,6 +200,7 @@ struct TraceEntry {
   cudaStream_t stream_{};
   size_t size_;
   trace_time_ time_{};
+  std::string name_;
 };
 
 struct AllocatorConfigInfo {
@@ -289,6 +294,7 @@ class CUDAAllocator : public Allocator {
       CreateContextFn context_recorder,
       size_t alloc_trace_max_entries,
       RecordContext when) = 0;
+  virtual void recordAnnotation(bool start, const std::string& name) = 0;
   virtual void attachOutOfMemoryObserver(OutOfMemoryObserver observer) = 0;
 
   // Attached AllocatorTraceTracker callbacks will be called while the
@@ -426,6 +432,10 @@ inline void recordHistory(
     RecordContext when) {
   return get()->recordHistory(
       enabled, context_recorder, alloc_trace_max_entries, when);
+}
+
+inline void recordAnnotation(bool start, const std::string& name) {
+  return get()->recordAnnotation(start, name);
 }
 
 inline bool isHistoryEnabled() {

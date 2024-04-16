@@ -95,4 +95,24 @@ void MemoryReportingInfoBase::reportOutOfMemory(
     size_t /*total_reserved*/,
     Device /*device*/) {}
 
+namespace {
+std::function<void(bool, const std::string&)>&
+_RecordAnnotationsToMemorySnapshotFn() {
+  static std::function<void(bool, const std::string&)> fn =
+      [](bool, const std::string&) { ; };
+  return fn;
+}
+} // namespace
+
+void _setRecordAnnotationsToMemorySnapshotFn(
+    std::function<void(bool, const std::string&)> callback) {
+  _RecordAnnotationsToMemorySnapshotFn() = std::move(callback);
+}
+
+void reportRecordAnnotationsToMemorySnapshot(
+    bool start,
+    const std::string& name) {
+  _RecordAnnotationsToMemorySnapshotFn()(start, name);
+}
+
 } // namespace c10

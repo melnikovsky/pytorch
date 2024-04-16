@@ -1,6 +1,7 @@
 #include <ATen/ThreadLocalState.h>
 #include <ATen/cpp_custom_type_hack.h>
 #include <ATen/record_function.h>
+#include <c10/core/Allocator.h>
 #include <torch/csrc/autograd/record_function_ops.h>
 
 #include <torch/csrc/jit/runtime/operator.h>
@@ -30,6 +31,8 @@ static void record_function_enter(
       rec.before(name);
     }
   }
+  // Record the annotation into CCA for memory snapshot tool.
+  c10::reportRecordAnnotationsToMemorySnapshot(true, name);
 }
 
 // Legacy signature using cpp_custom_type_hack
@@ -59,6 +62,8 @@ static at::RecordFunction& getRecordFunctionFromTensor(
 
 // Ends the profiling scope created with record_function_enter.
 static void record_function_exit(at::RecordFunction& rec) {
+  // Record the annotation into CCA for memory snapshot tool.
+  c10::reportRecordAnnotationsToMemorySnapshot(false, rec.name());
   rec.end();
 }
 

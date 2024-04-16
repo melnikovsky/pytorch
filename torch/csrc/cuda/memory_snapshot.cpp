@@ -275,6 +275,8 @@ std::string _memory_snapshot_pickled() {
   IValue snapshot_s = "snapshot";
   IValue oom_s = "oom";
   IValue device_free_s = "device_free";
+  IValue annotation_start_s = "annotation_start";
+  IValue annotation_end_s = "annotation_end";
 
   using namespace c10::cuda::CUDACachingAllocator;
 
@@ -298,6 +300,10 @@ std::string _memory_snapshot_pickled() {
         return segment_unmap_s;
       case TraceEntry::SEGMENT_MAP:
         return segment_map_s;
+      case TraceEntry::ANNOTATION_START:
+        return annotation_start_s;
+      case TraceEntry::ANNOTATION_END:
+        return annotation_end_s;
     }
     throw std::runtime_error("unreachable");
   };
@@ -318,6 +324,9 @@ std::string _memory_snapshot_pickled() {
         frame_dict.push_back(trace_entry);
       }
       trace_entry.insert(time_us_s, te.time_.t_);
+      if (te.name_ != "") {
+        trace_entry.insert(name_s, te.name_);
+      }
       trace.push_back(trace_entry);
     }
     traces.push_back(trace);

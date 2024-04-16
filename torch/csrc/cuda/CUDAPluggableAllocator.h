@@ -106,6 +106,7 @@ struct CUDAPluggableAllocator
       c10::cuda::CUDACachingAllocator::CreateContextFn context_recorder,
       size_t alloc_trace_max_entries,
       c10::cuda::CUDACachingAllocator::RecordContext when) override;
+  void recordAnnotation(bool start, const std::string& name) override;
   void attachOutOfMemoryObserver(
       c10::cuda::CUDACachingAllocator::OutOfMemoryObserver observer) override;
   void attachAllocatorTraceTracker(
