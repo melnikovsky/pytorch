@@ -68,6 +68,7 @@ set(TORCH_PYTHON_INCLUDE_DIRECTORIES
     ${TORCH_ROOT}/third_party/onnx
     ${TORCH_ROOT}/third_party/flatbuffers/include
     ${TORCH_ROOT}/third_party/kineto/libkineto/include
+    ${TORCH_ROOT}/third_party/opentelemetry-cpp/api/include
 
     ${TORCH_SRC_DIR}/csrc
     ${TORCH_SRC_DIR}/csrc/api/include
@@ -355,9 +356,6 @@ if(USE_UCC)
   target_link_libraries(torch_python PRIVATE __caffe2_ucc)
   target_compile_definitions(torch_python PRIVATE USE_UCC)
 endif()
-
-# Allow torch_python to link to OpenTelemetry API headers
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../third_party/opentelemetry-cpp/api/include)
 
 if(BUILD_ONEDNN_GRAPH)
   target_compile_definitions(torch_python PRIVATE "-DBUILD_ONEDNN_GRAPH")
