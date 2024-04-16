@@ -335,13 +335,17 @@ class CachingAutotuner(KernelInterface):
             )
 
             cc_str = str(cc)
-            if 'gfx10' in cc_str or 'gfx11' in cc_str:
+            if "gfx10" in cc_str or "gfx11" in cc_str:
                 rocm_warp_size = 32
             else:
                 rocm_warp_size = 64
-            
-            target = (compile_meta["device_type"], cc) if not torch.version.hip else [compile_meta["device_type"], cc, rocm_warp_size]
-            
+
+            target = (
+                (compile_meta["device_type"], cc)
+                if not torch.version.hip
+                else [compile_meta["device_type"], cc, rocm_warp_size]
+            )
+
             options = {
                 "num_warps": compile_meta["num_warps"],
                 "num_stages": compile_meta["num_stages"],
@@ -686,7 +690,11 @@ class CachingAutotuner(KernelInterface):
             "meta": launcher.config.kwargs,
         }
 
-        binary = launcher.bin.asm["cubin"] if torch.version.hip is None else launcher.bin.asm["hsaco"]
+        binary = (
+            launcher.bin.asm["cubin"]
+            if torch.version.hip is None
+            else launcher.bin.asm["hsaco"]
+        )
         CudaKernelParamCache.set(key, params, binary)
 
         self.cuda_kernel_saved = True

@@ -170,7 +170,11 @@ def build_triton(
                 version=f"{version}",
                 expected_version=None,
             )
-            check_call([f"{SCRIPT_DIR}/amd/package_triton_wheel.sh"], cwd=triton_basedir, shell=True)
+            check_call(
+                [f"{SCRIPT_DIR}/amd/package_triton_wheel.sh"],
+                cwd=triton_basedir,
+                shell=True,
+            )
             print("ROCm libraries setup for triton installation...")
 
         check_call(
@@ -181,7 +185,11 @@ def build_triton(
         shutil.copy(whl_path, Path.cwd())
 
         if build_rocm:
-            check_call([f"{SCRIPT_DIR}/amd/patch_triton_wheel.sh"], cwd=triton_basedir, shell=True)
+            check_call(
+                [f"{SCRIPT_DIR}/amd/patch_triton_wheel.sh"],
+                cwd=triton_basedir,
+                shell=True,
+            )
         return Path.cwd() / whl_path.name
 
 
