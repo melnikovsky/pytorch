@@ -150,7 +150,7 @@ class Library:
         handle = entry.abstract_impl.register(func_to_register, source)
         self._registration_handles.append(handle)
 
-    def impl(self, op_name, fn, dispatch_key=''):
+    def impl(self, op_name, fn, dispatch_key='', *, dispatcher_convention=False):
         r'''Registers the function implementation for an operator defined in the library.
 
         Args:
@@ -206,7 +206,7 @@ class Library:
                     " for the base ops that it decomposes into.")
 
         assert self.m is not None
-        self.m.impl(name, dispatch_key if dispatch_key != "" else "CompositeImplicitAutograd", fn)
+        self.m.impl(name, dispatch_key if dispatch_key != "" else "CompositeImplicitAutograd", fn, dispatcher_convention)
 
         _impls.add(key)
         self._op_impls.add(key)
@@ -627,7 +627,11 @@ def register_autograd(op: _op_identifier, setup_context_fn: Callable, backward_f
 
     info = _library.autograd.Info(setup_context_fn, backward_fn)
     autograd_kernel = _library.autograd.make_autograd_impl(op, info)
-    impl(qualname, "Autograd", autograd_kernel, lib=lib)
+    namespace, opname = torch._library.utils.parse_namespace(qualname)
+    if lib is None:
+        lib = Library(namespace, "FRAGMENT")
+        _keep_alive.append(lib)
+    lib.impl(opname, autograd_kernel, "Autograd", dispatcher_convention=True)
 
 
 # If the op was defined in C++, then we want to make sure there was an
@@ -652,7 +656,7 @@ def _check_pystubs_once(func, qualname, actual_module_name):
         if maybe_pystub is None:
             if torch._library.utils.requires_set_python_module():
                 namespace = op.namespace
-                cpp_filename = op._handle().debug()
+                cpp_filename = op._handle.debug()
                 raise RuntimeError(
                     f"Operator '{qualname}' was defined in C++ and has a Python "
                     f"fake impl. In this situation, we require there to also be a "
@@ -663,7 +667,7 @@ def _check_pystubs_once(func, qualname, actual_module_name):
         else:
             pystub_module = maybe_pystub[0]
             if actual_module_name != pystub_module:
-                cpp_filename = op._handle().debug()
+                cpp_filename = op._handle.debug()
                 raise RuntimeError(
                     f"Operator '{qualname}' specified that its python fake impl "
                     f"is in the Python module '{pystub_module}' but it was actually found "
