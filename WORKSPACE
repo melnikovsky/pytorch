@@ -369,4 +369,9 @@ local_repository(
     path = "third_party/opentelemetry-cpp/exporters",
 )
 
+local_repository(
+    name = "unused_opentelemetry_exporters_oltp",
+    path = "third_party/opentelemetry-cpp/exporters/otlp",
+)
+
 ### Unused repos end
