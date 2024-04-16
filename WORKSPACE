@@ -360,8 +360,8 @@ local_repository(
 )
 
 local_repository(
-    name = "unused_opentelemetry_third_party",
-    path = "third_party/opentelemetry-cpp/third_party",
+    name = "unused_opentelemetry_third_party_prometheus",
+    path = "third_party/opentelemetry-cpp/third_party/prometheus-cpp",
 )
 
 local_repository(
