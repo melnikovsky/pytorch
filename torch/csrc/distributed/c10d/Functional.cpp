@@ -434,7 +434,7 @@ at::Tensor all_to_all_single_autograd(
     const std::vector<int64_t>& input_split_sizes,
     const std::string& group_name) {
   return AllToAllSingle::apply(
-      input, output_split_sizes, input_split_sizes, group_name)[0];
+      input, output_split_sizes, input_split_sizes, group_name);
 }
 
 } // namespace

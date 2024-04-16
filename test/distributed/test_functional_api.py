@@ -663,6 +663,7 @@ class TestFunctionalAutograd(MultiThreadedTestCase):
             compiled = my_func
 
         out = compiled(t, self.world_size)
+        self.assertEqual(out.shape, t.shape)
         self.assertIsNotNone(out.grad_fn)
         self.assertTrue(out.requires_grad)
         loss = out.sum()
@@ -701,6 +702,66 @@ class TestFunctionalAutograd(MultiThreadedTestCase):
                 "_c10d_functional.wait_tensor.default", 1, exactly=True
             ).run(code)
 
+        self.assertIsNotNone(t.grad)
+
+
+class TestFunctionalAutogradWithNCCL(MultiProcessTestCase):
+    def setUp(self):
+        super().setUp()
+        os.environ["WORLD_SIZE"] = str(self.world_size)
+        os.environ["BACKEND"] = dist.Backend.NCCL
+        self._spawn_processes()
+
+    @property
+    def device(self):
+        return torch.device(self.rank)
+
+    @property
+    def world_size(self):
+        return 2
+
+    @property
+    def process_group(self):
+        return dist.group.WORLD
+
+    def dist_init(self):
+        dist.init_process_group(
+            backend=BACKEND,
+            world_size=self.world_size,
+            rank=self.rank,
+            init_method=f"file://{self.file_name}",
+        )
+
+        # set device for nccl pg for collectives
+        if BACKEND == "nccl":
+            torch.cuda.set_device(self.rank)
+
+    def destroy_comms(self):
+        # Wait for all ranks to reach here before starting shutdown.
+        dist.barrier()
+        dist.destroy_process_group()
+
+    @requires_nccl()
+    @with_comms()
+    def test_all_to_all_single(self) -> None:
+        group = self.process_group.group_name
+
+        t = torch.rand((self.world_size, 2), requires_grad=True, device=self.device)
+
+        sizes = [1] * self.world_size
+        assert t.requires_grad
+        out = ft_c.all_to_all_single_autograd(
+            t,
+            sizes,
+            sizes,
+            group
+        )
+
+        self.assertEqual(out.shape, t.shape)
+        self.assertIsNotNone(out.grad_fn)
+        self.assertTrue(out.requires_grad)
+        loss = out.sum()
+        loss.backward()
         self.assertIsNotNone(t.grad)
 
 
