@@ -104,19 +104,19 @@ def identify_license(f, exception=''):
             return 'BSL-1.0'
         elif 'gettimeofday' in txt:
             # Used in opentelemetry-cpp/tools/vcpkg/ports/gettimeofday
-            return 'gettimeofday'
+            return 'Apache-2.0'
         elif 'libhungarian' in txt:
             # Used in opentelemetry-cpp/tools/vcpkg/ports/hungarian
-            return 'libhungarian'
+            return 'Apache-2.0'
         elif 'PDCurses' in txt:
             # Used in opentelemetry-cpp/tools/vcpkg/ports/pdcurses
-            return 'PDCurses'
+            return 'Apache-2.0'
         elif 'Copyright1999UniversityofNorthCarolina' in txt:
             # Used in opentelemtry-cpp/tools/vcpkg/ports/pqp
-            return 'pqp'
+            return 'Apache-2.0'
         elif 'sigslot' in txt:
             # Used in opentelemtry-cpp/tools/vcpkg/ports/sigslot
-            return 'sigslot'
+            return 'Apache-2.0'
         elif squeeze("Clarified Artistic License") in txt:
             return 'Clarified Artistic License'
         elif all([squeeze(m) in txt.lower() for m in bsd3_txt]):
