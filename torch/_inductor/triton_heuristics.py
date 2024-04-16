@@ -334,7 +334,8 @@ class CachingAutotuner(KernelInterface):
                 ),
             )
 
-            if 'gfx10' in cc or 'gfx11' in cc:
+            cc_str = str(cc)
+            if 'gfx10' in cc_str or 'gfx11' in cc_str:
                 rocm_warp_size = 32
             else:
                 rocm_warp_size = 64

@@ -89,10 +89,11 @@ def build_triton(
     with TemporaryDirectory() as tmpdir:
         triton_basedir = Path(tmpdir) / "triton"
         triton_pythondir = triton_basedir / "python"
-        triton_repo = "https://github.com/openai/triton"
         if build_rocm:
+            triton_repo = "https://github.com/ROCm/triton"
             triton_pkg_name = "pytorch-triton-rocm"
         else:
+            triton_repo = "https://github.com/openai/triton"
             triton_pkg_name = "pytorch-triton"
         check_call(["git", "clone", triton_repo], cwd=tmpdir)
         if release:
@@ -167,7 +168,7 @@ def build_triton(
                 triton_pythondir / "setup.py",
                 name=triton_pkg_name,
                 version=f"{version}",
-                expected_version=ROCM_TRITION_VERSION,
+                expected_version=None,
             )
             check_call([f"{SCRIPT_DIR}/amd/package_triton_wheel.sh"], cwd=triton_basedir, shell=True)
             print("ROCm libraries setup for triton installation...")
@@ -180,7 +181,7 @@ def build_triton(
         shutil.copy(whl_path, Path.cwd())
 
         if build_rocm:
-	    check_call([f"{SCRIPT_DIR}/amd/patch_triton_wheel.sh"], cwd=triton_basedir, shell=True)
+            check_call([f"{SCRIPT_DIR}/amd/patch_triton_wheel.sh"], cwd=triton_basedir, shell=True)
         return Path.cwd() / whl_path.name
 
 
