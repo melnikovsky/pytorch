@@ -159,7 +159,7 @@ def max_clock_rate():
         # Manually set max-clock speeds on ROCm until equivalent nvmsi
         # functionality in triton.testing or via pyamdsmi enablement. Required
         # for test_snode_runtime unit tests.
-        gcn_arch = str(torch.cuda.get_device_properties(0).gcnArchName.split(':', 1)[0])
+        gcn_arch = str(torch.cuda.get_device_properties(0).gcnArchName.split(":", 1)[0])
         if "gfx4" in gcn_arch:
             return 1900
         elif "gfx9" in gcn_arch:
