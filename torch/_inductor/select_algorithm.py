@@ -656,7 +656,7 @@ class TritonTemplate(KernelTemplate):
             num_warps=num_warps,
             matrix_instr_nonkdim=kwargs.get("matrix_instr_nonkdim", 0),
             input_tensor_meta=TensorMeta.from_irnodes(input_nodes),
-            output_tensor_meta=TensorMeta.from_irnodes(layout),
+            output_tensor_meta=TensorMeta.from_irnodes(layouts),
         )
 
         return TritonTemplateCaller(
@@ -785,6 +785,12 @@ class TritonTemplateCaller(ir.TritonTemplateCallerBase):
         )
 
     def output_node(self):
+        if isinstance(self.layout, List):
+            output_ir = [
+                ir.MultiOutputOut(layout, self.input_nodes, i)
+                for i, layout in enumerate(self.layout)
+            ]
+            return output_ir
         return ir.TensorBox.create(
             ir.TritonTemplateBuffer(
                 layout=self.layout,
