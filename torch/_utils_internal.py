@@ -164,7 +164,7 @@ def max_clock_rate():
             return 1900
         elif "gfx9" in gcn_arch:
             return 1600
-        else
+        else:
             return 1000
 
 
