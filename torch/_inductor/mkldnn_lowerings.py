@@ -1,10 +1,27 @@
-from typing import List
+from typing import List, Optional
 
 import torch
 import torch.utils._pytree as pytree
-from . import ir
+from . import config, ir
+from .codegen.cpp_gemm_template import CppPackedGemmTemplate
 from .ir import TensorBox
-from .lowering import add, add_needs_realized_inputs, aten, register_lowering, to_dtype
+from .lowering import (
+    add,
+    add_needs_realized_inputs,
+    aten,
+    permute,
+    register_lowering,
+    to_dtype,
+    view,
+)
+from .select_algorithm import (
+    autotune_select_algorithm,
+    DataProcessorTemplateWrapper,
+    ExternKernelChoice,
+    realize_inputs,
+)
+from .utils import sympy_product
+from .virtualized import V
 
 
 def register_onednn_fusion_ops():
@@ -339,6 +356,12 @@ def register_onednn_fusion_ops():
             )
 
         if torch._C.has_mkl:
+            aten_mkl_linear = ExternKernelChoice(
+                torch.ops.mkl._mkl_linear,
+                "mkl::_mkl_linear",
+                has_out_variant=False,
+                kernel_creator=ir.MKLPackedLinear.create,
+            )
             cpu_needs_realized_inputs.append(torch.ops.mkl._mkl_linear)
 
             @register_lowering(torch.ops.mkl._mkl_linear)
@@ -346,12 +369,88 @@ def register_onednn_fusion_ops():
                 x: TensorBox,
                 packed_w: TensorBox,
                 orig_w: TensorBox,
-                b: TensorBox,
+                b: Optional[TensorBox],
                 batch_size,
+                *,
+                layout=None,
             ):
-                result = TensorBox.create(
-                    ir.MKLPackedLinear.create(x, packed_w, orig_w, batch_size)
+                choices = [
+                    aten_mkl_linear.bind(
+                        (x, packed_w, orig_w), layout, B=None, batch_size=batch_size
+                    )
+                ]
+                if config.max_autotune or config.max_autotune_gemm:
+                    *m, _ = x.get_size()
+                    n, k = orig_w.get_size()
+                    # TODO: decide block size per ISA
+                    # TODO: use larger block size for larger batch sizes
+                    # TODO: support n % n_block_size != 0
+                    n_block_size = 16
+                    if n % n_block_size == 0:
+
+                        def preprocessor(inputs, layout_or_out):
+                            x = inputs[0]
+                            w = inputs[2]
+                            if isinstance(w, ir.IRNode):
+                                x = view(x, [-1, k])
+                                blocked_w = permute(
+                                    view(w, (n / n_block_size, n_block_size, k)),
+                                    [0, 2, 1],
+                                )
+                                blocked_w = ir.ExternKernel.require_contiguous(
+                                    blocked_w
+                                )
+                                x, blocked_w = realize_inputs(x, blocked_w)
+                                if layout_or_out is None:
+                                    layout_or_out = ir.FixedLayout(
+                                        x.get_device(),
+                                        x.get_dtype(),
+                                        [sympy_product((*m,)), n],
+                                    )
+                            else:
+                                x = x.view([-1, k])
+                                blocked_w = (
+                                    w.reshape(n / n_block_size, n_block_size, k)
+                                    .transpose(1, 2)
+                                    .contiguous()
+                                )
+                            return [x, blocked_w], layout_or_out
+
+                        def postprocessor(out):
+                            if not isinstance(m, (list, tuple)):
+                                return out
+                            if isinstance(out, ir.IRNode):
+                                return view(out, [*m, n])
+                            else:
+                                return out.view([*m, n])
+
+                        template = DataProcessorTemplateWrapper(
+                            CppPackedGemmTemplate,
+                            preprocessor,
+                            postprocessor,
+                            input_nodes=[x, packed_w, orig_w, None, batch_size],
+                            layout=layout,
+                            n_block_size=n_block_size,
+                        )
+                        layout = template.layout
+                        template.maybe_append_choice(choices)
+
+                assert isinstance(packed_w.data, ir.StorageBox)
+                assert isinstance(packed_w.data.data, ir.ConstantBuffer)
+                assert isinstance(orig_w.data, ir.StorageBox)
+                assert isinstance(orig_w.data.data, ir.ConstantBuffer)
+                input_gen_fns = {
+                    1: lambda x: V.graph.constants[x.get_name()],
+                    2: lambda x: V.graph.constants[x.get_name()],
+                }
+                chosen_node: TensorBox = autotune_select_algorithm(
+                    "packed_linear",
+                    choices,
+                    [x, packed_w, orig_w],
+                    layout,
+                    input_gen_fns=input_gen_fns,
                 )
+                result = TensorBox.create(chosen_node)
                 if b is not None:
                     result = add(result, b)
                 return result
