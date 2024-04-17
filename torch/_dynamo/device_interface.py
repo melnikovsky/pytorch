@@ -206,7 +206,7 @@ class CudaInterface(DeviceInterface):
             major, min = torch.cuda.get_device_capability(device)
             return major * 10 + min
         else:
-            return torch.cuda.get_device_properties(device).gcnArchName.split(':', 1)[0]
+            return torch.cuda.get_device_properties(device).gcnArchName.split(":", 1)[0]
 
 
 get_xpu_stream: Optional[Callable[[int], int]]

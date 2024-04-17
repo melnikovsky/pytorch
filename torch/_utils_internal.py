@@ -151,9 +151,22 @@ def justknobs_getval_int(name: str) -> int:
 
 @functools.lru_cache(None)
 def max_clock_rate():
-    from triton.testing import nvsmi
+    if not torch.version.hip:
+        from triton.testing import nvsmi
 
-    return nvsmi(["clocks.max.sm"])[0]
+        return nvsmi(["clocks.max.sm"])[0]
+    else:
+        # Manually set max-clock speeds on ROCm until equivalent nvmsi
+        # functionality in triton.testing or via pyamdsmi enablement. Required
+        # for test_snode_runtime unit tests.
+        gcn_arch = str(torch.cuda.get_device_properties(0).gcnArchName.split(':', 1)[0])
+        if "gfx4" in gcn_arch:
+            return 1900
+        elif "gfx9" in gcn_arch:
+            return 1600
+        else
+            return 1000
+
 
 
 TEST_MASTER_ADDR = "127.0.0.1"
